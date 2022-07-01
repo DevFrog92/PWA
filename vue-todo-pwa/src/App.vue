@@ -106,12 +106,65 @@
 </template>
 
 <script>
+import { oTodosinDB } from "@/datasources/firebase";
+
 export default {
   name: "App",
   data() {
     return {
+      oTodos: [],
       sTodoTitle: "",
     };
   },
+  firebase: {
+    oTodos: oTodosinDB,
+  },
+  methods: {
+    fnSubmitTodo() {
+      oTodosinDB.push({
+        todo_title: this.sTodoTitle,
+        b_completed: false,
+        b_edit: false,
+      });
+      this.sTodoTitle = "";
+    },
+    fnRemoveTodo(pKey) {
+      oTodosinDB.child(pKey).remove();
+    },
+    fnSetEditTodo(pKey) {
+      oTodosinDB.child(pKey).update({
+        b_edit: true,
+      });
+    },
+    fnCancelEdit(pKey) {
+      oTodosinDB.child(pKey).update({
+        b_edit: false,
+      });
+    },
+    fnSaveEdit(pItem) {
+      const sKey = pItem[".key"];
+      oTodosinDB.child(sKey).set({
+        todo_title: pItem.todo_title,
+        b_completed: pItem.b_completed,
+        b_edit: false,
+      });
+    },
+    fnCheckboxChange(pItem) {
+      const sKey = pItem[".key"];
+      oTodosinDB.child(sKey).update({
+        b_completed: pItem.b_completed,
+      });
+    },
+  },
 };
 </script>
+
+<style scoped>
+.pointer {
+  cursor: pointer;
+}
+
+.style_completed {
+  text-decoration: line-through;
+}
+</style>
